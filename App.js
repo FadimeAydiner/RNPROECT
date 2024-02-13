@@ -4,14 +4,26 @@ import {
   StyleSheet, 
   
   View ,
- 
+  Button,
   FlatList} from 'react-native';
+
+  import { StatusBar} from 'expo-status-bar';
 
 import GoalItem from './components/GoalItem';
 import GoalInput from './components/GoalInput';
 
 export default function App() {
+  const [modalIsVisible,setModalIsVisible]=useState(false);
   const [courseGoals,setCourseGolas]=useState([]);
+
+  function startAddGoalHanler(){
+    setModalIsVisible(true);
+  }
+  function endAddGoalHanler(){
+    setModalIsVisible(false);
+  
+  }
+
 
   function addGoalHandler(enteredGoalText){
     //updateing ourgoal list by adding enteredGoalText to the courseGoals
@@ -20,15 +32,34 @@ export default function App() {
       //{text:enteredGoalText,key:Math.random().toString()},
       //we created random keys when a goal is typed
 
-      {text:enteredGoalText,id:Math.random().toString()},
+      {text:enteredGoalText,id:Math.random().toString()}
       //courseGoal is an object that has text and id parameters
     ]);
 
+    endAddGoalHanler();
+
   };
+
+  function deleteGoalHandler(id){
+    setCourseGolas(currentCourseGoals=>{
+      return currentCourseGoals.filter((goal)=>goal.id!== id);
+
+      //if the goal id isnot equal id then currentCourseGoals keep but if it is equal te array will not keep it and update itself
+    });
+  }
   
   return (
+    <>
+    <StatusBar style='light'/>
     <View style={styles.appContainer}>
-       <GoalInput onAddGoal={addGoalHandler}/>
+       <Button title='Add New Goal' 
+                color="#a065ec" 
+                onPress={startAddGoalHanler}/>
+       <GoalInput 
+                visible={modalIsVisible} 
+                onAddGoal={addGoalHandler}
+                  />
+        
       
       <View style={styles.goalsContainer}>
         {/*ScrollView renders all list everytime even you just show 20 items. 
@@ -48,7 +79,9 @@ export default function App() {
         <FlatList 
           data={courseGoals} 
           renderItem={(itemData)=>{
-           return <GoalItem text={itemData.item.text}/>;
+           return <GoalItem text={itemData.item.text}
+                            id={itemData.item.id}
+                            onDeleteItem={deleteGoalHandler}/>;
           }}
           keyExtractor={(item,index)=>{
             return item.id;
@@ -58,6 +91,7 @@ export default function App() {
       
       </View>   
     </View>
+    </>
   );
 }
 
@@ -65,7 +99,9 @@ const styles = StyleSheet.create({
   appContainer:{
     flex:1,
     padding:50,
-    paddingHorizontal:16
+    paddingHorizontal:16,
+   
+
   },  
   goalsContainer:{
     flex:5
